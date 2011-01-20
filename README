@@ -1,0 +1,12 @@
+This is a small command line tool used for unpacking original Arx Fatalis game files.
+
+Usage:
+    arx-unpacker filename.pak
+
+On execution it will unpack files to current working directory.
+
+Nearest plans:
+    
+* Add more usefule options, like listing files without extraction, extracting subset of files, etc.
+* Write build scripts for other platforms
+  
