@@ -114,12 +114,13 @@ int main(int argc, const char* argv[])
         TCLAP::UnlabeledValueArg<string> pak_name("input", "input file name", true, "", ".pak file", cmd);
         cmd.parse(argc, argv);
 
-        // read fat table from pak
-        FAT fat(pak_name.getValue().c_str());
-
+        // open input
         FileHandle in_f(pak_name.getValue().c_str(), "rb");
         if(!in_f)
-            throw AppException("pak file is not accessible");
+            throw AppException("specified pak file is not accessible");
+
+        // read fat table from pak
+        FAT fat(in_f);
 
         size_t d_cnt = fat.dirs.size();
         for(size_t i=0; i<d_cnt; ++i) {

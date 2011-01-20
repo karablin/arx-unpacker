@@ -47,17 +47,16 @@ struct PakDir
 class FAT
 {
 public:
-    FAT(const char* fname);
+    FAT(FILE* fh);
     ~FAT();
     
     std::vector<PakDir> dirs;
 private:
     FAT(); // no default construction
 
-    FILE* f;          // handle to .pak file
     uint8_t *raw_fat; // place where fat stored in memory
 
-    void readFAT();   // all things happens there
+    void readFAT(FILE* f);   // all things happens there
 };
 
 // arx fat decryptor

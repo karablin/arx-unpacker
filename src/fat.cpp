@@ -51,27 +51,19 @@ namespace _impl
 using namespace _impl;
 
 
-FAT::FAT(const char* fname)
+FAT::FAT(FILE* f)
     : raw_fat(0)
 {
-    FILE* fh = fopen(fname, "rb");
-    if(!fh) {
-        throw AppException("specified input file doesn't exists, or cannot be opened");
-    }
-
-    f = fh;
-
-    readFAT();
+    readFAT(f);
 }
 
 FAT::~FAT()
 {
-    fclose(f);
     free(raw_fat);
     raw_fat = 0;
 }
 
-void FAT::readFAT()
+void FAT::readFAT(FILE* f)
 {
     uint32_t fat_offset;
     uint32_t fat_size;
