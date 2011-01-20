@@ -22,7 +22,7 @@
 #endif
 
 #include <limits>
-
+#include "tclap/CmdLine.h"
 #include "app_exception.h"
 #include "fat.h"
 #include "file_handle.h"
@@ -31,6 +31,8 @@
 extern "C" {
 #include "blast.h"
 }
+
+using namespace std;
 
 const size_t BUFFER_SIZE = 2048;
 struct BlastReadContext
@@ -107,9 +109,15 @@ int main(int argc, const char* argv[])
     const char* fname = argv[1];
     
     try {
-        FAT fat(fname);
+        // command line options
+        TCLAP::CmdLine cmd("Arx Fatalis .pak file unpacker", ' ', "0.2", true);
+        TCLAP::UnlabeledValueArg<string> pak_name("input", "input file name", true, "", ".pak file", cmd);
+        cmd.parse(argc, argv);
 
-        FileHandle in_f(fname, "rb");
+        // read fat table from pak
+        FAT fat(pak_name.getValue().c_str());
+
+        FileHandle in_f(pak_name.getValue().c_str(), "rb");
         if(!in_f)
             throw AppException("pak file is not accessible");
 
