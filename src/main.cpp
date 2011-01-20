@@ -15,9 +15,15 @@
  *   along with arx-unpacker.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <exception>
-#include <limits>
+#if defined(_WIN32)
 #include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
+
+#include <limits>
+
+#include "app_exception.h"
 #include "fat.h"
 #include "file_handle.h"
 
@@ -63,7 +69,7 @@ void simple_write(FILE* in, FILE* out, size_t len)
     }
 }
 
-void extractFiles(const PakDir& dir, FILE* in_f)
+void extractFiles(const PakDir& dir, FileHandle& in_f)
 {
     size_t f_cnt = dir.files.size();
     for(size_t i=0; i<f_cnt; ++i) {
@@ -71,9 +77,9 @@ void extractFiles(const PakDir& dir, FILE* in_f)
         printf("[F]\t%s\n", f.name.c_str());
 
         std::string full_name = dir.name + f.name;
-        FileHandle out_f = fopen(full_name.c_str(), "wb");
+        FileHandle out_f(fopen(full_name.c_str(), "wb"));
         if(!out_f)
-            throw std::exception("can't create output file");
+            throw AppException("can't create output file");
 
         fseek(in_f, f.offset, SEEK_SET);
 
@@ -105,14 +111,18 @@ int main(int argc, const char* argv[])
 
         FileHandle in_f(fname, "rb");
         if(!in_f)
-            throw std::exception("pak file is not accessible");
+            throw AppException("pak file is not accessible");
 
         size_t d_cnt = fat.dirs.size();
         for(size_t i=0; i<d_cnt; ++i) {
             const PakDir &d = fat.dirs[i];
             printf("[D] %s\n", d.name.c_str());
 
+#if defined(_WIN32)
             mkdir(d.name.c_str());
+#else
+            mkdir(d.name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#endif
             extractFiles(d, in_f);
         }
 

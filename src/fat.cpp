@@ -15,14 +15,16 @@
  *   along with arx-unpacker.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "fat.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <exception>
+
+#include "app_exception.h"
+#include "fat.h"
 
 namespace _impl
 {
-   	const char* full_key = "AVQF3FCKE50GRIAYXJP2AMEYO5QGA0JGIIH2NHBTVOA1VOGGU5H3GSSIARKPRQPQKKYEOIAQG1XRX0J4F5OEAEFI4DD3LL45VJTVOA1VOGGUKE50GRIAYX";
+    const char* full_key = "AVQF3FCKE50GRIAYXJP2AMEYO5QGA0JGIIH2NHBTVOA1VOGGU5H3GSSIARKPRQPQKKYEOIAQG1XRX0J4F5OEAEFI4DD3LL45VJTVOA1VOGGUKE50GRIAYX";
     const char* demo_key = "NSIARKPRQPHBTE50GRIH3AYXJP2AMF3FCEYAVQO5QGA0JGIIH2AYXKVOA1VOGGU5GSQKKYEOIAQG1XRX0J4F5OEAEFI4DD3LL45VJTVOA1VOGGUKE50GRI";
     
     const char* selectKey(uint32_t first_bytes)
@@ -33,7 +35,7 @@ namespace _impl
         case 0x4149534E: 
             return demo_key;
         default:
-            throw std::exception("cannot determine type of decrypting key");
+            throw AppException("cannot determine type of decrypting key");
         }
 
     }
@@ -43,7 +45,7 @@ namespace _impl
     inline void check(bool if_true, const char* exc_msg)
     {
         if(if_true)
-            throw std::exception(exc_msg);
+            throw AppException(exc_msg);
     }
 }
 using namespace _impl;
@@ -54,7 +56,7 @@ FAT::FAT(const char* fname)
 {
     FILE* fh = fopen(fname, "rb");
     if(!fh) {
-        throw std::exception("specified input file doesn't exists, or cannot be opened");
+        throw AppException("specified input file doesn't exists, or cannot be opened");
     }
 
     f = fh;
