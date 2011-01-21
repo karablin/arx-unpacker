@@ -2,11 +2,17 @@ This is a small command line tool used for unpacking original Arx Fatalis game f
 
 Usage:
     arx-unpacker filename.pak
+    
+    for more options, please run: arx-unpacker -h
+
 
 On execution it will unpack files to current working directory.
 
 Nearest plans:
     
-* Add more usefule options, like listing files without extraction, extracting subset of files, etc.
-* Write build scripts for other platforms
-  
+Add more useful options, like extracting subset of files, etc.
+
+
+Building from sources:
+    
+Use cmake>=2.8 to generate makefile, then make.  No dependencies, except c/c++ stdlib required.
