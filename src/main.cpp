@@ -38,6 +38,7 @@ int main(int argc, const char* argv[])
         TCLAP::CmdLine cmd("Arx Fatalis .pak file unpacker", ' ', "0.2", true);
         TCLAP::SwitchArg list_arg("l","list","List files (not extract)", cmd, false);
         TCLAP::SwitchArg verbose_arg("v","verbose","Show what files and dirs are created", cmd, false);
+        TCLAP::SwitchArg no_caps_arg("n","no-caps","Extract files/directories in lower case", cmd, false);
         TCLAP::UnlabeledValueArg<string> pak_name("input", "input file name", true, "", ".pak file", cmd);
         cmd.parse(argc, argv);
 
@@ -47,7 +48,11 @@ int main(int argc, const char* argv[])
             throw AppException("specified pak file not found");
 
         // unpack
-        Unpacker unp(in_f, verbose_arg.getValue(), list_arg.getValue());
+        Unpacker unp(in_f, 
+            verbose_arg.getValue(), 
+            list_arg.getValue(),
+            no_caps_arg.getValue()
+            );
         unp.unpack();
 
     } catch(std::exception &e) {

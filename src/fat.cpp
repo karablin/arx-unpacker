@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
+
 #include <algorithm>
 
 #include "app_exception.h"
@@ -52,8 +54,9 @@ namespace
     }
 }
 
-FAT::FAT(FILE* f)
+FAT::FAT(FILE* f, bool no_caps)
     : raw_fat(0)
+    , no_caps(no_caps)
 {
     readFAT(f);
 }
@@ -84,9 +87,9 @@ void FAT::readFAT(FILE* f)
     while(dec.bytesLeft())
     {
         // read dir
-        char* dir_name = dec.decryptString();
+        string dir_name = dec.decryptString(no_caps);
 
-        if(*dir_name != '\0') {
+        if(dir_name.size()) {
             PakDir d;
             d.name = dir_name;
             replace(d.name.begin(), d.name.end(), '\\', '/'); // fix slashes
@@ -100,7 +103,7 @@ void FAT::readFAT(FILE* f)
         while(files_count--) {
             PakFile f;
 
-            f.name = dec.decryptString();
+            f.name   = dec.decryptString(no_caps);
             f.offset = dec.decryptDword();
             f.flags  = dec.decryptDword();
             f.p3     = dec.decryptDword();
@@ -139,10 +142,13 @@ uint32_t FATDecryptor::decryptDword()
     return *rval;
 }
 
-char* FATDecryptor::decryptString() 
+string FATDecryptor::decryptString(bool no_caps) 
 {
     char* str = (char*)raw_fat;
-    while( decryptChar() );
+    while( decryptChar() ) {
+
+        if(no_caps) *(raw_fat-1) = tolower(*(raw_fat-1));
+    }
 
     return str;
 }

@@ -47,7 +47,7 @@ struct PakDir
 class FAT
 {
 public:
-    FAT(FILE* fh);
+    FAT(FILE* fh, bool no_caps=false);
     ~FAT();
     
     std::vector<PakDir> dirs;
@@ -55,6 +55,7 @@ private:
     FAT(); // no default construction
 
     uint8_t *raw_fat; // place where fat stored in memory
+    bool no_caps;     // convert all paths to lowercase
 
     void readFAT(FILE* f);   // all things happens there
 };
@@ -70,10 +71,11 @@ public:
     FATDecryptor(const char* key, uint8_t* fat_loc, size_t fat_sz) 
         : key_str(key), key_pos(0), raw_fat(fat_loc), fat_size(fat_sz) {};
 
-    uint8_t  decryptChar();
-    uint32_t decryptDword();
-    char*    decryptString();
-    size_t   bytesLeft() { return fat_size; }
+    uint8_t     decryptChar();
+    uint32_t    decryptDword();
+    std::string decryptString(bool no_caps);
+
+    size_t bytesLeft() { return fat_size; }
 private:
     FATDecryptor(); // not intended to use with default constructor
 };

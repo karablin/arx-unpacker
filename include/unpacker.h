@@ -25,13 +25,13 @@
 class Unpacker : private NonCopyable
 {
 public:
-    Unpacker(FILE* pak_file, bool verbose, bool list_only=false) 
+    Unpacker(FILE* pak_file, bool verbose, bool list_only=false, bool no_caps=false) 
         : in_f(pak_file)
-        , fat(pak_file)
+        , fat(pak_file, no_caps)
         , verbose(verbose)
-        , list_only(list_only) 
+        , list_only(list_only)
     {
-        if(this->list_only) this->verbose = true;
+        if(list_only) this->verbose = true;
     }
     
     void unpack();
