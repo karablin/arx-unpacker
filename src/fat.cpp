@@ -18,11 +18,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <algorithm>
 
 #include "app_exception.h"
 #include "fat.h"
 
-namespace _impl
+using namespace std;
+
+namespace
 {
     const char* full_key = "AVQF3FCKE50GRIAYXJP2AMEYO5QGA0JGIIH2NHBTVOA1VOGGU5H3GSSIARKPRQPQKKYEOIAQG1XRX0J4F5OEAEFI4DD3LL45VJTVOA1VOGGUKE50GRIAYX";
     const char* demo_key = "NSIARKPRQPHBTE50GRIH3AYXJP2AMF3FCEYAVQO5QGA0JGIIH2AYXKVOA1VOGGU5GSQKKYEOIAQG1XRX0J4F5OEAEFI4DD3LL45VJTVOA1VOGGUKE50GRI";
@@ -48,8 +51,6 @@ namespace _impl
             throw AppException(exc_msg);
     }
 }
-using namespace _impl;
-
 
 FAT::FAT(FILE* f)
     : raw_fat(0)
@@ -88,6 +89,8 @@ void FAT::readFAT(FILE* f)
         if(*dir_name != '\0') {
             PakDir d;
             d.name = dir_name;
+            replace(d.name.begin(), d.name.end(), '\\', '/'); // fix slashes
+
             dirs.push_back(d);
         }
 

@@ -30,7 +30,9 @@ public:
         , fat(pak_file)
         , verbose(verbose)
         , list_only(list_only) 
-    {}
+    {
+        if(this->list_only) this->verbose = true;
+    }
     
     void unpack();
 private:

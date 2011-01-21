@@ -22,6 +22,8 @@
 #else
 #include <sys/stat.h>
 #endif
+#include <iostream>
+#include <algorithm>
 
 #include "app_exception.h"
 #include "file_handle.h"
@@ -29,6 +31,7 @@ extern "C" {
 #include "blast.h"
 }
 
+using namespace std;
 /*
  * Data decompression callbacks
  */
@@ -82,25 +85,28 @@ void Unpacker::unpackDir(const PakDir& dir)
     size_t f_cnt = dir.files.size();
     for(size_t i=0; i<f_cnt; ++i) {
         const PakFile &f = dir.files[i];
-        printf("[F]\t%s\n", f.name.c_str());
 
-        std::string full_name = dir.name + f.name;
-        FileHandle out_f(fopen(full_name.c_str(), "wb"));
-        if(!out_f)
-            throw AppException("can't create output file");
+        string full_name = dir.name + f.name;
+        if(verbose) cout << full_name << endl;
 
-        fseek(in_f, f.offset, SEEK_SET);
+        if(!list_only) {
+            FileHandle out_f(fopen(full_name.c_str(), "wb"));
+            if(!out_f)
+                throw AppException("can't create output file");
 
-        if(f.flags & PakFile::PACKED) {
-            // unpack
-            BlastReadContext rctx;
-            rctx.f    = in_f;
-            rctx.size = f.size;
+            fseek(in_f, f.offset, SEEK_SET);
 
-            blast(blast_read, &rctx, blast_write, out_f);
-        } else {
-            // simple copy
-            simpleCopy(out_f, f.size);
+            if(f.flags & PakFile::PACKED) {
+                // unpack
+                BlastReadContext rctx;
+                rctx.f    = in_f;
+                rctx.size = f.size;
+
+                blast(blast_read, &rctx, blast_write, out_f);
+            } else {
+                // simple copy
+                simpleCopy(out_f, f.size);
+            }
         }
     }
 }
@@ -110,13 +116,15 @@ void Unpacker::unpack()
     size_t d_cnt = fat.dirs.size();
     for(size_t i=0; i<d_cnt; ++i) {
         const PakDir &d = fat.dirs[i];
-        printf("[D] %s\n", d.name.c_str());
+        if(verbose) cout << d.name << endl;
 
+        if(!list_only) {
 #if defined(_WIN32)
-        mkdir(d.name.c_str());
+            mkdir(d.name.c_str());
 #else
-        mkdir(d.name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+            mkdir(d.name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 #endif
+        }
         unpackDir(d);
     }
 }
